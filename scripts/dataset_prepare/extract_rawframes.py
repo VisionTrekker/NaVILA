@@ -1,8 +1,9 @@
 import multiprocessing.dummy as mp
 import re
 import subprocess
-from os import listdir, mkdir
+from os import listdir, mkdir, makedirs
 
+DATASET_DIR: str = "/media/lenovo/disk/Dataset"
 
 def extract_frames(videopath, dest, fps=1):
 
@@ -28,18 +29,18 @@ def extract_frames(videopath, dest, fps=1):
 
 def extract_all_frames():
     try:
-        mkdir("/PATH_TO_DATA/NaVILA-Dataset/Human/raw_frames", exist_ok=True)
+        makedirs(f"{DATASET_DIR}/NaVILA-Dataset/Human/raw_frames", exist_ok=True)
         print("creating frames subdirectory")
     except:
         print("frames subdirectory already exists")
-    videos = listdir("/PATH_TO_DATA/NaVILA-Dataset/Human/videos")
+    videos = listdir(f"{DATASET_DIR}/NaVILA-Dataset/Human/videos")
 
     def eaf(vid):
         vid_id = re.match("(.*).mp4", vid)[1]
-        subdir = "/PATH_TO_DATA/NaVILA-Dataset/Human/raw_frames/" + vid_id
+        subdir = f"{DATASET_DIR}/NaVILA-Dataset/Human/raw_frames/" + vid_id
         try:
             mkdir(subdir)
-            extract_frames("/PATH_TO_DATA/NaVILA-Dataset/Human/videos/" + vid, subdir, fps=1)
+            extract_frames(f"{DATASET_DIR}/NaVILA-Dataset/Human/videos/" + vid, subdir, fps=1)
         except FileExistsError:
             print(f"skipping {vid}")
 

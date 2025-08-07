@@ -50,7 +50,13 @@ Please download the repo and extract the `tar.gz` files in their respective subf
 </p>
 
 * **YouTube Human Touring:**  
-Due to copyright restrictions, raw videos/images are not released. We provide **[video IDs](https://huggingface.co/datasets/a8cheng/NaVILA-Dataset/blob/main/Human/video_ids.txt)** and **annotations**. You can download the videos using `yt-dlp` and extract frames using: `scripts/extract_rawframes.py`
+1. Due to copyright restrictions, raw videos/images are not released. We provide **[video IDs](https://huggingface.co/datasets/a8cheng/NaVILA-Dataset/blob/main/Human/video_ids.txt)** and **annotations**. You can download the videos using `yt-dlp`. (`video_ids.txt` has 1982 videos, which may take a long time to download. If you want to download only a subset of videos, can create the `video_ids_small.txt` to download the videos you need.)
+    ```bash
+    pip install -U yt-dlp
+    chmod +x ./scripts/dataset_prepare/download_Human_videos.sh
+    ./scripts/dataset_prepare/download_Human_videos.sh
+    ```
+2. extract frames using: `python scripts/dataset_prepare/extract_rawframes.py` (modify `DATASET_DIR` in the script)
 
 * **EnvDrop:**  
 Due to the large number of videos, we provide **annotations only**. Please download the **R2R augmented split** from [R2R_VLNCE_v1-3_preprocessed.zip](https://drive.google.com/file/d/1fo8F4NKgZDH-bPSdVU3cONAkt5EW-tyr/view?usp=sharing) and render corresponding videos using [VLN-CE](https://github.com/jacobkrantz/VLN-CE).
