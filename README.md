@@ -56,7 +56,7 @@ Please download the repo and extract the `tar.gz` files in their respective subf
     chmod +x ./scripts/dataset_prepare/download_Human_videos.sh
     ./scripts/dataset_prepare/download_Human_videos.sh
     ```
-2. extract frames using: `python scripts/dataset_prepare/extract_rawframes.py` (modify `DATASET_DIR` in the script)
+2. extract frames using: `python scripts/dataset_prepare/extract_rawframes.py` (modify `DATASET_DIR` in the scripts)
 
 * **EnvDrop:**  
 Due to the large number of videos, we provide **annotations only**. Please download the **R2R augmented split** from [R2R_VLNCE_v1-3_preprocessed.zip](https://drive.google.com/file/d/1fo8F4NKgZDH-bPSdVU3cONAkt5EW-tyr/view?usp=sharing) and render corresponding videos using [VLN-CE](https://github.com/jacobkrantz/VLN-CE).
@@ -108,9 +108,19 @@ NaVILA-Dataset
 1. Modify the dataset path `DATASET_DIR` in `llava/data/datasets_mixture.py`.
 2. Download the pretrained model is provided in [a8cheng/navila-siglip-llama3-8b-v1.5-pretrain](https://huggingface.co/a8cheng/navila-siglip-llama3-8b-v1.5-pretrain) and vision tower is provided in [google/siglip-so400m-patch14-384](https://huggingface.co/google/siglip-so400m-patch14-384).
    ```bash
-   python scripts/dataset_prepare/download_model.py --dataset_dir <PATH> --model_id <MODEL_ID>
+   python scripts/dataset_prepare/download_model.py --dataset_dir <DATASET_PATH> --model_id <MODEL_ID>
+   ```
+   or use git-lfs + mirror
+   ```bash
+   # 先只拉指针文件
+   GIT_LFS_SKIP_SMUDGE=1 git clone https://hf-mirror.com/<MODEL_ID>
+   # 再用 git lfs fetch 分批拉取
+   cd navila-llama3-8b-8f
+   git lfs fetch --all  # 二进制文件会被拉取到 .git/lfs/objects
+   git lfs checkout  # 拷贝到工作目录
    ```
 3. Modify the dataset_name and model_path use in `scripts/train/sft_8frames.sh`, and use it to lanuch the training.
+
 
 
 ## 📊 Evaluation
@@ -120,45 +130,74 @@ NaVILA-Dataset
 This repository builds on [VLN-CE](https://github.com/jacobkrantz/VLN-CE), which relies on older versions of [Habitat-Lab](https://github.com/facebookresearch/habitat-lab/tree/v0.1.7) and [Habitat-Sim](https://github.com/facebookresearch/habitat-lab/tree/v0.1.7). The installation process requires several modifications and can be complex.
 
 1. Create a Conda Environment with Python 3.10
-```bash
-conda create -n navila-eval python=3.10
-conda activate navila-eval
-```
+   ```bash
+   conda create -n navila-eval python=3.10
+   conda activate navila-eval
+   ```
 
-2. Build Habitat-Sim & Lab (v0.1.7) from **Source**
-
-Follow the [VLN-CE setup guide](https://github.com/jacobkrantz/VLN-CE?tab=readme-ov-file#setup).
-To resolve NumPy compatibility issues, apply the following hotfix:
-```bash
-python evaluation/scripts/habitat_sim_autofix.py # replace habitat_sim/utils/common.py
-```
+2. Build Habitat-Sim & Lab (v0.1.7) from **Source** (Follow the [VLN-CE setup guide](https://github.com/jacobkrantz/VLN-CE?tab=readme-ov-file#setup))
+* Install Habitat-Sim (v0.1.7)
+  * Clone the repository and checkout the specific tag:
+     ```bash
+     git clone --branch v0.1.7 https://github.com/facebookresearch/habitat-sim.git
+     cd cd habitat-sim
+     ```
+  * Install Dependencies
+     ```bash
+     conda install cmake=3.14.0
+     pip install -r requirements.txt
+     sudo apt-get install -y --no-install-recommends libjpeg-dev libglm-dev libgl1-mesa-glx libegl1-mesa-dev mesa-utils xorg-dev freeglut3-dev
+     ```
+  * Build Habitat-Sim (CUDA + Bullet physics simulation)
+     ```bash
+     sudo apt-get install libbullet-dev
+     python setup.py install --with-cuda --bullet
+     ```
+  * Testing
+     ```bash
+     ./build/viewer /path/to/data/scene_datasets/habitat-test-scenes/skokloster-castle.glb
+     ```
+* Install Habitat-Lab (v0.1.7)
+   ```bash
+   git clone --branch v0.1.7 git@github.com:facebookresearch/habitat-lab.git
+   cd habitat-lab
+   # installs both habitat and habitat_baselines
+   python -m pip install -r requirements.txt
+   python -m pip install -r habitat_baselines/rl/requirements.txt  # 注释掉 tensorflow==1.13.1
+   python -m pip install -r habitat_baselines/rl/ddppo/requirements.txt
+   python setup.py develop --all
+   ```
+* To resolve NumPy compatibility issues, apply the following hotfix:
+   ```bash
+   python evaluation/scripts/habitat_sim_autofix.py # replace habitat_sim/utils/common.py
+   ```
 
 3. Install VLN-CE Dependencies
-```bash
-pip install -r evaluation/requirements.txt
-```
+   ```bash
+   pip install -r evaluation/requirements.txt
+   ```
 
 4. Install VILA Dependencies
-```bash
-# Install FlashAttention2
-pip install https://github.com/Dao-AILab/flash-attention/releases/download/v2.5.8/flash_attn-2.5.8+cu122torch2.3cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
-
-# Install VILA (assum in root dir)
-pip install -e .
-pip install -e ".[train]"
-pip install -e ".[eval]"
-
-# Install HF's Transformers
-pip install git+https://github.com/huggingface/transformers@v4.37.2
-site_pkg_path=$(python -c 'import site; print(site.getsitepackages()[0])')
-cp -rv ./llava/train/transformers_replace/* $site_pkg_path/transformers/
-cp -rv ./llava/train/deepspeed_replace/* $site_pkg_path/deepspeed/
-```
+   ```bash
+   # Install FlashAttention2
+   pip install https://github.com/Dao-AILab/flash-attention/releases/download/v2.5.8/flash_attn-2.5.8+cu122torch2.3cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
+   
+   # Install VILA (assum in root dir)
+   pip install -e .
+   pip install -e ".[train]"
+   pip install -e ".[eval]"
+    
+   # Install HF's Transformers
+   pip install git+https://github.com/huggingface/transformers@v4.37.2
+   site_pkg_path=$(python -c 'import site; print(site.getsitepackages()[0])')
+   cp -rv ./llava/train/transformers_replace/* $site_pkg_path/transformers/
+   cp -rv ./llava/train/deepspeed_replace/* $site_pkg_path/deepspeed/
+   ```
 
 5. Fix WebDataset Version for VLN-CE Compatibility
-```bash
-pip install webdataset==0.1.103
-```
+   ```bash
+   pip install webdataset==0.1.103
+   ```
 
 ### Data
 Please follow [VLN-CE](https://github.com/jacobkrantz/VLN-CE) and download R2R and RxR annotations, and scene data inside the `evaluation/data` folder. The data should have structure like:
@@ -187,33 +226,34 @@ data/scene_datasets
 |   ├─ ...
 ```
 ### Running Evaluation
-1. Download the checkpoint from [a8cheng/navila-llama3-8b-8f](https://huggingface.co/a8cheng/navila-llama3-8b-8f).
+1. Download the checkpoint from [a8cheng/navila-llama3-8b-8f](https://huggingface.co/a8cheng/navila-llama3-8b-8f). (like above (use git-lfs + mirror))
 2. Run evaluation on R2R using:
-```bash
-cd evaluation
-bash scripts/eval/r2r.sh CKPT_PATH NUM_CHUNKS CHUNK_START_IDX "GPU_IDS"
-```
-Examples:
-* Single GPU:
-    ```bash
-    bash scripts/eval/r2r.sh CKPT_PATH 1 0 "0"
-    ```
-* Multiple GPUs (e.g., 8 GPUs):
-    ```bash
-    bash scripts/eval/r2r.sh CKPT_PATH 8 0 "0,1,2,3,4,5,6,7"
-    ```
+   ```bash
+   cd evaluation
+   bash scripts/eval/r2r.sh CKPT_PATH NUM_CHUNKS CHUNK_START_IDX "GPU_IDS"
+   ```
+   Examples:
+   * Single GPU:
+      ```bash
+       bash scripts/eval/r2r.sh CKPT_PATH 1 0 "0"
+      ```
+   * Multiple GPUs (e.g., 8 GPUs):
+      ```bash
+      bash scripts/eval/r2r.sh CKPT_PATH 8 0 "0,1,2,3,4,5,6,7"
+      ```
 3. Visualized videos are saved in 
-```bash
-./eval_out/CKPT_NAME/VLN-CE-v1/val_unseen/videos
-```
+   ```bash
+   ./eval_out/CKPT_NAME/VLN-CE-v1/val_unseen/videos
+   ```
 <p align="center">
   <img src="assets/sample.gif" width="600">
 </p>
+
 4. Aggregate results and view the scores
 
-```bash
-python scripts/eval_jsons.py ./eval_out/CKPT_NAME/VLN-CE-v1/val_unseen NUM_CHUNKS
-```
+   ```bash
+   python scripts/eval_jsons.py ./eval_out/CKPT_NAME/VLN-CE-v1/val_unseen NUM_CHUNKS
+   ```
 
 _______________________________________________________________
 
