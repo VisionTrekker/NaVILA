@@ -105,7 +105,12 @@ NaVILA-Dataset
 
 
 ### Training
-The pretrain model to start from is provided in [a8cheng/navila-siglip-llama3-8b-v1.5-pretrain](https://huggingface.co/a8cheng/navila-siglip-llama3-8b-v1.5-pretrain). Please modify the data paths in `llava/data/datasets_mixture.py` and use the script in `scripts/train/sft_8frames.sh` to lanuch the training. 
+1. Modify the dataset path `DATASET_DIR` in `llava/data/datasets_mixture.py`.
+2. Download the pretrained model is provided in [a8cheng/navila-siglip-llama3-8b-v1.5-pretrain](https://huggingface.co/a8cheng/navila-siglip-llama3-8b-v1.5-pretrain) and vision tower is provided in [google/siglip-so400m-patch14-384](https://huggingface.co/google/siglip-so400m-patch14-384).
+   ```bash
+   python scripts/dataset_prepare/download_model.py --dataset_dir <PATH> --model_id <MODEL_ID>
+   ```
+3. Modify the dataset_name and model_path use in `scripts/train/sft_8frames.sh`, and use it to lanuch the training.
 
 
 ## 📊 Evaluation

@@ -17,6 +17,8 @@
 import warnings
 from dataclasses import dataclass, field
 
+DATASET_DIR: str = "/media/lenovo/disk/Dataset"
+
 
 @dataclass
 class Dataset:
@@ -35,7 +37,6 @@ class Dataset:
     test_script: str = (None,)
     maintainer: str = (None,)
     ############## ############## ############## ############## ############## ##############
-    caption_choice: str = field(default=None, metadata={"help": "Path to the captions for webdataset."})
     caption_choice_2: str = field(default=None, metadata={"help": "Path to the captions for webdataset."})
     start_idx: float = field(default=-1, metadata={"help": "Start index of the dataset."})
     end_idx: float = field(default=-1, metadata={"help": "Start index of the dataset."})
@@ -54,35 +55,35 @@ def add_dataset(dataset):
 
 def register_datasets_mixtures():
 
-    video_chatgpt = Dataset(
-        dataset_name="video_chatgpt",
-        dataset_type="torch",
-        data_path="/PATH_TO_DATA/annotations.json",
-        image_path="/PATH_TO_DATA/videos",
-    )
-    add_dataset(video_chatgpt)
-
-    sharegpt_video = Dataset(
-        dataset_name="sharegpt_video",
-        dataset_type="torch",
-        data_path="/PATH_TO_DATA/annotations.json",
-        image_path="/PATH_TO_DATA/videos",
-    )
-    add_dataset(sharegpt_video)
-
-    sharegpt4v_sft = Dataset(
-        dataset_name="sharegpt4v_sft",
-        dataset_type="torch",
-        data_path="/PATH_TO_DATA/annotations.json",
-        image_path="/PATH_TO_DATA/videos",
-    )
-    add_dataset(sharegpt4v_sft)
+    # video_chatgpt = Dataset(
+    #     dataset_name="video_chatgpt",
+    #     dataset_type="torch",
+    #     data_path="/PATH_TO_DATA/annotations.json",
+    #     image_path="/PATH_TO_DATA/videos",
+    # )
+    # add_dataset(video_chatgpt)
+    #
+    # sharegpt_video = Dataset(
+    #     dataset_name="sharegpt_video",
+    #     dataset_type="torch",
+    #     data_path="/PATH_TO_DATA/annotations.json",
+    #     image_path="/PATH_TO_DATA/videos",
+    # )
+    # add_dataset(sharegpt_video)
+    #
+    # sharegpt4v_sft = Dataset(
+    #     dataset_name="sharegpt4v_sft",
+    #     dataset_type="torch",
+    #     data_path="/PATH_TO_DATA/annotations.json",
+    #     image_path="/PATH_TO_DATA/videos",
+    # )
+    # add_dataset(sharegpt4v_sft)
 
     envdrop = Dataset(
         dataset_name="envdrop",
         dataset_type="envdrop",
-        data_path="/PATH_TO_DATA/NaVILA-Dataset/EnvDrop/annotations.json",
-        image_path="/PATH_TO_DATA/NaVILA-Dataset/EnvDrop/videos",
+        data_path=f"{DATASET_DIR}/NaVILA-Dataset/EnvDrop/annotations.json",
+        image_path=f"{DATASET_DIR}/NaVILA-Dataset/EnvDrop/videos",
         description="VLN_CE Envdrop.",
     )
     add_dataset(envdrop)
@@ -90,8 +91,8 @@ def register_datasets_mixtures():
     scanqa = Dataset(
         dataset_name="scanqa",
         dataset_type="torch",
-        data_path="/PATH_TO_DATA/NaVILA-Dataset/ScanQA/annotations/ScanQA_v1.0_train_reformat.json",
-        image_path="/PATH_TO_DATA/NaVILA-Dataset/ScanQA/videos",
+        data_path=f"{DATASET_DIR}/NaVILA-Dataset/ScanQA/annotations/ScanQA_v1.0_train_reformat.json",
+        image_path=f"{DATASET_DIR}/NaVILA-Dataset/ScanQA/videos",
         description="ScanQA training set.",
     )
     add_dataset(scanqa)
@@ -99,8 +100,8 @@ def register_datasets_mixtures():
     r2r = Dataset(
         dataset_name="r2r",
         dataset_type="vlnce",
-        data_path="/PATH_TO_DATA/NaVILA-Dataset/R2R/annotations.json",
-        image_path="/PATH_TO_DATA/NaVILA-Dataset/R2R/train",
+        data_path=f"{DATASET_DIR}/NaVILA-Dataset/R2R/annotations.json",
+        image_path=f"{DATASET_DIR}/NaVILA-Dataset/R2R/train",
         description="350K VLN-CE R2R data. (augmented aith duplicate samples)",
     )
     add_dataset(r2r)
@@ -108,8 +109,8 @@ def register_datasets_mixtures():
     rxr = Dataset(
         dataset_name="rxr",
         dataset_type="vlnce",
-        data_path="/PATH_TO_DATA/NaVILA-Dataset/RxR/annotations.json",
-        image_path="/PATH_TO_DATA/NaVILA-Dataset/RxR/train",
+        data_path=f"{DATASET_DIR}/NaVILA-Dataset/RxR/annotations.json",
+        image_path=f"{DATASET_DIR}/NaVILA-Dataset/RxR/train",
         description="400K RxR data. (augmented aith duplicate stops only - 5x)",
     )
     add_dataset(rxr)
@@ -117,8 +118,8 @@ def register_datasets_mixtures():
     human = Dataset(
         dataset_name="human",
         dataset_type="vlnce",
-        data_path="/PATH_TO_DATA/NaVILA-Dataset/Human/annotations.json",
-        image_path="/PATH_TO_DATA/NaVILA-Dataset/Human/raw_frames/",
+        data_path=f"{DATASET_DIR}/NaVILA-Dataset/Human/annotations.json",
+        image_path=f"{DATASET_DIR}/NaVILA-Dataset/Human/raw_frames/",
         description="560K Real augmented, no direction is included. (augmented aith duplicate stops only - 5x)",
     )
     add_dataset(human)
